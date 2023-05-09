@@ -41,7 +41,6 @@ var board = [
 let player = '';
 function setPlayer(_player){
     player = _player;
-    console.log(player);
 }
 
 /**
@@ -76,15 +75,25 @@ function handleDragStart(event) {
     currentSquare.classList.add("dragging");
     pieceImg.classList.add("dragging");
 
-    // highlight available cells
+
     const currentX = parseInt(currentSquare.dataset.x);
     const currentY = parseInt(currentSquare.dataset.y);
+    
+
     for (let y = 0; y < BOARD_WIDTH; y++) {
         for (let x = 0; x < BOARD_HEIGHT; x++) {
-            if (isValidMove(currentX, currentY, x, y, piece)) {
+            // highlight available move cells
+            if (isValidMove(currentX, currentY, x, y)) {
                 const square = document.querySelector(`.square[data-x="${x}"][data-y="${y}"]`);
                 if (square) {
                     square.classList.add("valid-move");
+                }
+            }
+            // highlight available attack cells
+            if (isValidAttack(currentX, currentY, x, y)) {
+                const square = document.querySelector(`.square[data-x="${x}"][data-y="${y}"]`);
+                if (square) {
+                    square.classList.add("valid-attack");
                 }
             }
         }
@@ -98,19 +107,17 @@ function handleDragEnd(event) {
     const square = event.target.closest(".square");
     if (!square) return;
     if (!square.classList.contains("valid-move")) return;
-    const currentSquare = document.querySelector(".dragging");
-    if (currentSquare) {
-        const currentX = parseInt(currentSquare.dataset.x);
-        const currentY = parseInt(currentSquare.dataset.y);
-        const targetX = parseInt(square.dataset.x);
-        const targetY = parseInt(square.dataset.y);
-        if (isValidMove(currentX, currentY, targetX, targetY)) {
-            square.classList.add("droppable");
-        }
-    }
+
+    // remove highlight to valid moves
     const validMoves = document.querySelectorAll(".valid-move");
     for (const validMove of validMoves) {
         validMove.classList.remove("valid-move");
+    }
+
+    // remove highlight to attack moves
+    const attackMoves = document.querySelectorAll(".attack-move");
+    for (const attackMove of attackMoves) {
+        attackMove.classList.remove("attack-move");
     }
 }
 
@@ -146,7 +153,7 @@ function handleDrop(event) {
     }
 
     // Move the piece on the board and update the UI
-    if (!isValidMove(currentX,currentY,targetX,targetY,piece)){
+    if (!isValidMove(currentX,currentY,targetX,targetY)){
         console.error("Invalid move:", currentSquare, square);
         return;
     }
@@ -160,10 +167,19 @@ function handleDragOver(event) {
     event.preventDefault();
 }
 
-// Create a function to check if a move is valid
-function isValidMove(startX, startY, endX, endY,piece) {
-    console.log(piece,player);
-    if (board[endY][endX] != null) return false;
+
+/**
+ * @param {*} startX starting X
+ * @param {*} startY starting Y
+ * @param {*} endX ending X (must be clear return true)
+ * @param {*} endY ending Y (must be clear to return true)
+ * @returns true if a move is valid, false otherwise
+ */
+function isValidMove(startX, startY, endX, endY) {
+    let piece = board[startY][startX];
+    let enemy = board[endY][endX];
+    if (startX==endX && startY== endY) return false;
+    if (enemy != null) return false;
     if(player == WHITE && [BLACK_KING,BLACK_QUEEN,BLACK_ROOK,BLACK_BISHOP,BLACK_KNIGHT,BLACK_PAWN].includes(piece)) return false;
     if(player == BLACK && [WHITE_KING,WHITE_QUEEN,WHITE_ROOK,WHITE_BISHOP,WHITE_KNIGHT,WHITE_PAWN].includes(piece)) return false;
     if([BLACK_BISHOP,BLACK_PAWN,BLACK_ROOK,WHITE_BISHOP,WHITE_PAWN,WHITE_ROOK].includes(piece)){
@@ -175,7 +191,35 @@ function isValidMove(startX, startY, endX, endY,piece) {
     return true;
 }
 
+/**
+ * @param {*} startX starting X
+ * @param {*} startY starting Y
+ * @param {*} endX ending X (must be opponent piece to return true)
+ * @param {*} endY ending Y (must be opponent piece to return true)
+ * @returns true if it a possible cell to attack, false otherwise
+ */
+function isValidAttack(startX, startY, endX, endY) {
+    let piece = board[startY][startX];
+    let enemy = board[endY][endX];
+    if (startX==endX && startY== endY) return false;
+    if (enemy == null) return false;
+    if(getSide(piece) == getSide(enemy)) return false;
+    
+    if([BLACK_BISHOP,WHITE_BISHOP,BLACK_KNIGHT,WHITE_KNIGHT].includes(piece)){
+        return Math.abs(startX-endX)<=2 && Math.abs(startY-endY)<=2;
+    }
+    return Math.abs(startX-endX)<=1 && Math.abs(startY-endY)<=1;
+}
 
+
+/**
+ * @param {*} piece piece
+ * @return piece side
+ */
+function getSide(piece){
+    if ([BLACK_KING,BLACK_QUEEN,BLACK_ROOK,BLACK_BISHOP,BLACK_KNIGHT,BLACK_PAWN].includes(piece)) return BLACK;
+    return WHITE;
+}
 
 /**
  * #     #   ###
