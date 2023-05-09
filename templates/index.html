@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Board Game</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+    <body>
+        <button id="player1Button" onclick="setPlayer('W');">Play as white</button>
+        <button id="player2Button" onclick="setPlayer('B');">Play as black</button>
+        <div id="chessboard"></div>
+    
+        <script src="{{ url_for('static', filename='app.js') }}"></script>
+    </body>
+</html>
