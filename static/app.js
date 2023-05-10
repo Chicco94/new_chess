@@ -3,42 +3,37 @@ const BOARD_WIDTH = 11;
 const BOARD_HEIGHT = 11;
 
 // Define piece types
-const BLACK_KING = "bk";
-const BLACK_QUEEN = "bq";
-const BLACK_ROOK = "br";
-const BLACK_BISHOP = "bb";
+const BLACK_SOLDIER = "br";
+const BLACK_ARCER = "bb";
 const BLACK_KNIGHT = "bn";
-const BLACK_PAWN = "bp";
+const BLACK_SPEAR = "bp";
 
-const WHITE_KING = "wk";
-const WHITE_QUEEN = "wq";
-const WHITE_ROOK = "wr";
-const WHITE_BISHOP = "wb";
+const WHITE_SOLDIER = "wr";
+const WHITE_ARCER = "wb";
 const WHITE_KNIGHT = "wn";
-const WHITE_PAWN = "wp";
+const WHITE_SPEAR = "wp";
 
 // Define piece colors
 const WHITE = "W";
 const BLACK = "B";
 
 
-
 // Create an array to represent the initial state of the chessboard
 var board = [
-	[null,BLACK_KNIGHT,BLACK_KNIGHT,BLACK_BISHOP, BLACK_BISHOP, BLACK_BISHOP, BLACK_BISHOP, BLACK_BISHOP,  BLACK_KNIGHT, BLACK_KNIGHT, null],
-	[null,BLACK_KNIGHT,BLACK_KNIGHT,BLACK_ROOK, BLACK_ROOK, BLACK_ROOK, BLACK_ROOK, BLACK_ROOK, BLACK_KNIGHT, BLACK_KNIGHT, null],
-	[null, null,null,BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN,  null, null, null],
+	[null,BLACK_KNIGHT,BLACK_KNIGHT,BLACK_ARCER, BLACK_ARCER, BLACK_ARCER, BLACK_ARCER, BLACK_ARCER,  BLACK_KNIGHT, BLACK_KNIGHT, null],
+	[null,BLACK_KNIGHT,BLACK_KNIGHT,BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_KNIGHT, BLACK_KNIGHT, null],
+	[null, null,null,BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR,  null, null, null],
 	[null,null,null, null, null, null, null, null, null, null, null],
 	[null,null,null, null, null, null, null, null, null, null, null],
 	[null,null,null, null, null, null, null, null, null, null, null],
 	[null,null,null, null, null, null, null, null, null, null, null],
 	[null,null,null, null, null, null, null, null, null, null, null],
-	[null, null,null, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, null, null, null],
-	[null,WHITE_KNIGHT,WHITE_KNIGHT,WHITE_ROOK, WHITE_ROOK, WHITE_ROOK, WHITE_ROOK, WHITE_ROOK, WHITE_KNIGHT, WHITE_KNIGHT, null],
-	[null,WHITE_KNIGHT,WHITE_KNIGHT,WHITE_BISHOP, WHITE_BISHOP, WHITE_BISHOP, WHITE_BISHOP, WHITE_BISHOP,  WHITE_KNIGHT, WHITE_KNIGHT, null],
+	[null, null,null, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, null, null, null],
+	[null,WHITE_KNIGHT,WHITE_KNIGHT,WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_KNIGHT, WHITE_KNIGHT, null],
+	[null,WHITE_KNIGHT,WHITE_KNIGHT,WHITE_ARCER, WHITE_ARCER, WHITE_ARCER, WHITE_ARCER, WHITE_ARCER,  WHITE_KNIGHT, WHITE_KNIGHT, null],
 ];
 
-let player = '';
+let player = WHITE;
 function setPlayer(_player){
     player = _player;
 }
@@ -68,6 +63,12 @@ function handleDragStart(event) {
         console.error("Missing data-piece attribute on piece image:", pieceImg);
         return;
     }
+    if(getSide(piece) != player){
+        console.error("Player must move his own pieces", pieceImg, player);
+        return;
+    }
+
+
     event.dataTransfer.setData("text/plain", piece);
 
     // Add a "dragging" class to the piece image and to the square it's currently on
@@ -124,13 +125,7 @@ function handleDragEnd(event) {
 // Create a function to handle the dropping of a piece onto a square
 function handleDrop(event) {
     event.preventDefault();
-
-    const square = event.target;
-    if (!square.classList.contains("square")) {
-        console.error("Invalid drop target:", square);
-        return;
-    }
-
+    const landing_square = event.target;
     const piece = event.dataTransfer.getData("text/plain");
     if (!piece) {
         console.error("No data found in dataTransfer object:", event.dataTransfer);
@@ -143,23 +138,40 @@ function handleDrop(event) {
         return;
     }
 
-    const currentX = parseInt(currentSquare.dataset.x);
-    const currentY = parseInt(currentSquare.dataset.y);
-    const targetX = parseInt(square.dataset.x);
-    const targetY = parseInt(square.dataset.y);
-    if (isNaN(currentX) || isNaN(currentY) || isNaN(targetX) || isNaN(targetY)) {
-        console.error("Invalid square data attributes:", currentSquare, square);
+    let current_X = parseInt(currentSquare.dataset.x);
+    let current_Y = parseInt(currentSquare.dataset.y);
+    if(isNaN(current_X) || isNaN(current_Y)){
+        console.error("Invalid starting square data attributes:", currentSquare);
         return;
     }
-
-    // Move the piece on the board and update the UI
-    if (!isValidMove(currentX,currentY,targetX,targetY)){
-        console.error("Invalid move:", currentSquare, square);
-        return;
+    
+    let landing_X = parseInt(landing_square.dataset.x);
+    let landing_Y = parseInt(landing_square.dataset.y);
+    if (!isNaN(landing_X) && !isNaN(landing_Y)){
+        if (isValidMove(current_X,current_Y,landing_X,landing_Y)){
+            board[landing_Y][landing_X] = board[current_Y][current_X];
+            board[current_Y][current_X] = null;
+            setPlayer(player == WHITE ? BLACK : WHITE);
+            return generateChessboard();
+        } else {
+            console.error("Invalid landing data attributes:", landing_square);
+            return;
+        }
+    } 
+    
+    landing_X = parseInt(landing_square.parentNode.dataset.x);
+    landing_Y = parseInt(landing_square.parentNode.dataset.y);
+    if (!isNaN(landing_X) && !isNaN(landing_Y)){
+        if (isValidAttack(current_X,current_Y,landing_X,landing_Y)){
+            board[landing_Y][landing_X] = board[current_Y][current_X];
+            board[current_Y][current_X] = null;
+            setPlayer(player == WHITE ? BLACK : WHITE);
+            return generateChessboard();
+        } else {
+            console.error("Invalid attacking data attributes:", landing_square);
+            return;
+        }
     }
-    board[targetY][targetX] = board[currentY][currentX];
-    board[currentY][currentX] = null;
-    generateChessboard();
 }
 
 // Create a function to handle the dragging of a piece over a square
@@ -180,9 +192,10 @@ function isValidMove(startX, startY, endX, endY) {
     let enemy = board[endY][endX];
     if (startX==endX && startY== endY) return false;
     if (enemy != null) return false;
-    if(player == WHITE && [BLACK_KING,BLACK_QUEEN,BLACK_ROOK,BLACK_BISHOP,BLACK_KNIGHT,BLACK_PAWN].includes(piece)) return false;
-    if(player == BLACK && [WHITE_KING,WHITE_QUEEN,WHITE_ROOK,WHITE_BISHOP,WHITE_KNIGHT,WHITE_PAWN].includes(piece)) return false;
-    if([BLACK_BISHOP,BLACK_PAWN,BLACK_ROOK,WHITE_BISHOP,WHITE_PAWN,WHITE_ROOK].includes(piece)){
+    
+    if(player == WHITE && [BLACK_SOLDIER,BLACK_ARCER,BLACK_KNIGHT,BLACK_SPEAR].includes(piece)) return false;
+    if(player == BLACK && [WHITE_SOLDIER,WHITE_ARCER,WHITE_KNIGHT,WHITE_SPEAR].includes(piece)) return false;
+    if([BLACK_ARCER,BLACK_SPEAR,BLACK_SOLDIER,WHITE_ARCER,WHITE_SPEAR,WHITE_SOLDIER].includes(piece)){
         return Math.abs(startX-endX)<=1 && Math.abs(startY-endY)<=1;
     }
     if([BLACK_KNIGHT,WHITE_KNIGHT].includes(piece)){
@@ -204,8 +217,14 @@ function isValidAttack(startX, startY, endX, endY) {
     if (startX==endX && startY== endY) return false;
     if (enemy == null) return false;
     if(getSide(piece) == getSide(enemy)) return false;
+
+    // a knight cannot attack a spearman
+    if([BLACK_KNIGHT,WHITE_KNIGHT].includes(piece) && [BLACK_SPEAR,WHITE_SPEAR].includes(enemy)) return false;
+
+    // an arcer cannot attack a soldier
+    if([BLACK_ARCER,WHITE_ARCER].includes(piece) && [BLACK_SOLDIER,WHITE_SOLDIER].includes(enemy)) return false;
     
-    if([BLACK_BISHOP,WHITE_BISHOP,BLACK_KNIGHT,WHITE_KNIGHT].includes(piece)){
+    if([BLACK_ARCER,WHITE_ARCER,BLACK_KNIGHT,WHITE_KNIGHT].includes(piece)){
         return Math.abs(startX-endX)<=2 && Math.abs(startY-endY)<=2;
     }
     return Math.abs(startX-endX)<=1 && Math.abs(startY-endY)<=1;
@@ -217,7 +236,7 @@ function isValidAttack(startX, startY, endX, endY) {
  * @return piece side
  */
 function getSide(piece){
-    if ([BLACK_KING,BLACK_QUEEN,BLACK_ROOK,BLACK_BISHOP,BLACK_KNIGHT,BLACK_PAWN].includes(piece)) return BLACK;
+    if ([BLACK_SOLDIER,BLACK_ARCER,BLACK_KNIGHT,BLACK_SPEAR].includes(piece)) return BLACK;
     return WHITE;
 }
 
