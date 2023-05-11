@@ -1,9 +1,9 @@
 // Define chessboard dimensions
 import { BOARD,BOARD_WIDTH,BOARD_HEIGHT,BLACK_SOLDIER,BLACK_ARCHER,BLACK_KNIGHT,BLACK_SPEAR,WHITE_SOLDIER,WHITE_ARCHER,WHITE_KNIGHT,WHITE_SPEAR,WHITE,BLACK } from "./consts.js";
-import { getSide,makeMove } from "./utils.js";
+import { resetBoard,getSide,makeMove,showGameOverModal,changePlayer } from "./utils.js";
 
 // Create an array to represent the initial state of the chessboard
-var board = BOARD;
+let board = resetBoard();
 
 let player = WHITE;
 
@@ -222,7 +222,7 @@ function isValidAttack(startX, startY, endX, endY) {
 /**
  * generate the chessboard UI
  */
-export function generateChessboard() {
+function generateChessboard() {
     const chessboard = document.getElementById("chessboard");
     chessboard.innerHTML = "";
 
@@ -267,12 +267,52 @@ export function generateChessboard() {
 }
 
 
+function resetGame(){
+    board = resetBoard();
+    player = WHITE;
+    document.getElementById('timerW').innerHTML = '05:00';
+    document.getElementById('timerB').innerHTML = '05:00';
+
+    const modal = document.getElementById("game-over-modal");
+    modal.style.display = "none";
+    startTimer();
+    generateChessboard();
+}
+
+function startGame(){
+    startTimer();
+    const modal = document.getElementById("game-start-modal");
+    modal.style.display = "none";
+}
+
+function resignW(){
+    resign(WHITE);
+}
+
+function resignB(){
+    resign(BLACK);
+}
+function resign(player){
+    const winner = changePlayer(player);
+    showGameOverModal(winner);
+}
+
+function gameEnded(){
+    const modal = document.getElementById("game-over-modal");
+    return modal.style.display == "block";
+}
+
+
+document.getElementById("resingW").onclick = resignW;
+document.getElementById("resingB").onclick = resignB;
+document.getElementById("reset").onclick = resetGame;
+document.getElementById("start").onclick = startGame;
 document.getElementById('timerW').innerHTML = '05:00';
 document.getElementById('timerB').innerHTML = '05:00';
-startTimer();
 
 
 function startTimer() {
+    if (gameEnded()){return;}
     var timer = '';
     if (player == WHITE){timer = 'timerW';}
     else {timer = 'timerB';}
@@ -281,13 +321,17 @@ function startTimer() {
     var timeArray = presentTime.split(/[:]+/);
     var m = timeArray[0];
     var s = checkSecond((timeArray[1] - 1));
+    if (m == 0 && s == 0){
+        const winner = changePlayer(player);
+        showGameOverModal(winner);
+    }
     if(s==59){m=m-1}
     if(m<0){
         return
     }
   
     document.getElementById(timer).innerHTML = m + ":" + s;
-    console.log(m);
+    
     setTimeout(startTimer, 1000);
 }
 

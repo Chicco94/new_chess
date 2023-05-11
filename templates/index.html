@@ -8,15 +8,30 @@
         <div class="row">
             <div class="column">
                 <p id="timerB" class="timer top"></p>
+                <input id="resingB" type="button" value="RESING"/>
             </div>
             <div class="board_column">
                 <div id="chessboard"></div>
             </div>
             <div class="column">
                 <p id="timerW" class="timer bottom"></p>
+                <input id="resingW" type="button" value="RESING"/>
+            </div>
+        </div>
+
+        <div id="game-start-modal" class="modal" style="display: block;">
+            <div class="modal-container">
+                <p>Press to start the game</p>
+                <input id="start" type="button" value="START" />
             </div>
         </div>
         
+        <div id="game-over-modal" class="modal" style="display: none;">
+            <div class="modal-container">
+                <p>Game over! Player X wins!</p>
+                <input id="reset" type="button" value="RESET" />
+            </div>
+        </div>
     
         <script type="module" src="static/consts.js"></script>
         <script type="module" src="static/app.js"></script>

@@ -1,4 +1,4 @@
-import { BOARD_WIDTH,BOARD_HEIGHT,BLACK,WHITE,BLACK_SOLDIER,BLACK_ARCHER,BLACK_KNIGHT,BLACK_SPEAR, WHITE_ARCHER } from "./consts.js";
+import { BLACK,WHITE,BLACK_SOLDIER,BLACK_ARCHER,BLACK_KNIGHT,BLACK_SPEAR, WHITE_SOLDIER,WHITE_ARCHER,WHITE_KNIGHT,WHITE_SPEAR } from "./consts.js";
 
 /**
  * @param {*} player 
@@ -51,8 +51,40 @@ export function makeMove(board,current_X,current_Y,landing_X,landing_Y,player,is
         board[landing_Y][landing_X] = board[current_Y][current_X];
         board[current_Y][current_X] = null;
     }
+
+    const winner = checkWinner(board);
+    if (winner){
+        showGameOverModal(winner)
+    }
     player = changePlayer(player);
     return [board,player];
 }
 
 
+function checkWinner(board){
+    return WHITE;
+}
+
+
+export function showGameOverModal(winner) {
+    const modal = document.getElementById("game-over-modal");
+    const message = `Game over! Player ${winner} wins!`;
+    modal.querySelector("p").textContent = message;
+    modal.style.display = "block";
+}
+
+
+
+export function resetBoard(){
+    return [
+        [BLACK_KNIGHT,BLACK_KNIGHT,BLACK_ARCHER, BLACK_ARCHER, BLACK_ARCHER, BLACK_ARCHER, BLACK_ARCHER,  BLACK_KNIGHT, BLACK_KNIGHT],
+        [BLACK_KNIGHT,BLACK_KNIGHT,BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_KNIGHT, BLACK_KNIGHT],
+        [ null,null,BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR,  null, null],
+        [null,null, null, null, null, null, null, null, null],
+        [null,null, null, null, null, null, null, null, null],
+        [null,null, null, null, null, null, null, null, null],
+        [ null,null, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, null, null],
+        [WHITE_KNIGHT,WHITE_KNIGHT,WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_KNIGHT, WHITE_KNIGHT],
+        [WHITE_KNIGHT,WHITE_KNIGHT,WHITE_ARCHER, WHITE_ARCHER, WHITE_ARCHER, WHITE_ARCHER, WHITE_ARCHER,  WHITE_KNIGHT, WHITE_KNIGHT],
+    ];
+}
