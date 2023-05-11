@@ -1,4 +1,4 @@
-import { BLACK,WHITE,BLACK_SOLDIER,BLACK_ARCHER,BLACK_KNIGHT,BLACK_SPEAR, WHITE_SOLDIER,WHITE_ARCHER,WHITE_KNIGHT,WHITE_SPEAR } from "./consts.js";
+import { BOARD_HEIGHT, BOARD_WIDTH, BLACK,WHITE,BLACK_SOLDIER,BLACK_ARCHER,BLACK_KNIGHT,BLACK_SPEAR, WHITE_SOLDIER,WHITE_ARCHER,WHITE_KNIGHT,WHITE_SPEAR } from "./consts.js";
 
 /**
  * @param {*} player 
@@ -62,7 +62,21 @@ export function makeMove(board,current_X,current_Y,landing_X,landing_Y,player,is
 
 
 function checkWinner(board){
-    return WHITE;
+    let black_counter = 0;
+    let white_counter = 0;
+    for (let y = 0; y < BOARD_HEIGHT; y++) {
+        for (let x = 0; x < BOARD_WIDTH; x++) {
+            let piece = board[y][x];
+            if (getSide(piece)==WHITE){
+                white_counter += 1;
+            } else {
+                black_counter += 1;
+            }
+        }
+    } 
+    if (black_counter == 0) return WHITE;
+    if (white_counter == 0) return BLACK;
+    return false;
 }
 
 
