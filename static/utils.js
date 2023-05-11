@@ -82,7 +82,9 @@ function checkWinner(board){
 
 export function showGameOverModal(winner) {
     const modal = document.getElementById("game-over-modal");
-    const message = `Game over! Player ${winner} wins!`;
+    let message = "";
+    if (winner == WHITE) {message = `Game over! Red player wins!`;}
+    else {message = `Game over! Blue player wins!`;}
     modal.querySelector("p").textContent = message;
     modal.style.display = "block";
 }
