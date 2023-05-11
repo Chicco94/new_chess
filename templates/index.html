@@ -9,6 +9,8 @@
         <button id="player2Button" onclick="setPlayer('B');">Play as black</button>
         <div id="chessboard"></div>
     
-        <script src="{{ url_for('static', filename='app.js') }}"></script>
+        <script type="module" src="static/consts.js"></script>
+        <script type="module" src="static/app.js"></script>
+        <script type="module" src="static/utils.js"></script>
     </body>
 </html>

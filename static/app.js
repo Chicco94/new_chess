@@ -1,42 +1,14 @@
 // Define chessboard dimensions
-const BOARD_WIDTH = 11;
-const BOARD_HEIGHT = 11;
-
-// Define piece types
-const BLACK_SOLDIER = "br";
-const BLACK_ARCER = "bb";
-const BLACK_KNIGHT = "bn";
-const BLACK_SPEAR = "bp";
-
-const WHITE_SOLDIER = "wr";
-const WHITE_ARCER = "wb";
-const WHITE_KNIGHT = "wn";
-const WHITE_SPEAR = "wp";
-
-// Define piece colors
-const WHITE = "W";
-const BLACK = "B";
-
+import { BOARD,BOARD_WIDTH,BOARD_HEIGHT,BLACK_SOLDIER,BLACK_ARCER,BLACK_KNIGHT,BLACK_SPEAR,WHITE_SOLDIER,WHITE_ARCER,WHITE_KNIGHT,WHITE_SPEAR,WHITE,BLACK } from "./consts.js";
+import { getSide,makeMove } from "./utils.js";
 
 // Create an array to represent the initial state of the chessboard
-var board = [
-	[null,BLACK_KNIGHT,BLACK_KNIGHT,BLACK_ARCER, BLACK_ARCER, BLACK_ARCER, BLACK_ARCER, BLACK_ARCER,  BLACK_KNIGHT, BLACK_KNIGHT, null],
-	[null,BLACK_KNIGHT,BLACK_KNIGHT,BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_SOLDIER, BLACK_KNIGHT, BLACK_KNIGHT, null],
-	[null, null,null,BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR, BLACK_SPEAR,  null, null, null],
-	[null,null,null, null, null, null, null, null, null, null, null],
-	[null,null,null, null, null, null, null, null, null, null, null],
-	[null,null,null, null, null, null, null, null, null, null, null],
-	[null,null,null, null, null, null, null, null, null, null, null],
-	[null,null,null, null, null, null, null, null, null, null, null],
-	[null, null,null, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, WHITE_SPEAR, null, null, null],
-	[null,WHITE_KNIGHT,WHITE_KNIGHT,WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_SOLDIER, WHITE_KNIGHT, WHITE_KNIGHT, null],
-	[null,WHITE_KNIGHT,WHITE_KNIGHT,WHITE_ARCER, WHITE_ARCER, WHITE_ARCER, WHITE_ARCER, WHITE_ARCER,  WHITE_KNIGHT, WHITE_KNIGHT, null],
-];
+var board = BOARD;
 
 let player = WHITE;
-function setPlayer(_player){
-    player = _player;
-}
+
+// Call the generateChessboard function to create the initial chessboard UI
+generateChessboard();
 
 /**
  * ######  ######     #     #####            ##            ######  ######  ####### ######
@@ -48,10 +20,11 @@ function setPlayer(_player){
  * ######  #     # #     #  #####           #### #         ######  #     # ####### #
  */
 
-// Define the currently selected piece
-let selectedPiece = null;
-
-// Create a function to handle the start of a drag-and-drop operation
+/**
+ * handle the start of a drag-and-drop operation
+ * @param {*} event 
+ * @returns 
+ */
 function handleDragStart(event) {
     const pieceImg = event.target;
     if (!pieceImg.classList.contains("piece")) {
@@ -101,10 +74,13 @@ function handleDragStart(event) {
     }
 }
 
-/** Create a function to handle the end of a drag-and-drop operation
-*/
+
+/**
+ * handle the end of a drag-and-drop operation
+ * @param {*} event 
+ * @returns void
+ */
 function handleDragEnd(event) {
-    selectedPiece = null;
     const square = event.target.closest(".square");
     if (!square) return;
     if (!square.classList.contains("valid-move")) return;
@@ -122,10 +98,14 @@ function handleDragEnd(event) {
     }
 }
 
-// Create a function to handle the dropping of a piece onto a square
+
+/**
+ * handle the dropping of a piece onto a square
+ * @param {*} event 
+ * @returns void
+ */
 function handleDrop(event) {
     event.preventDefault();
-    const landing_square = event.target;
     const piece = event.dataTransfer.getData("text/plain");
     if (!piece) {
         console.error("No data found in dataTransfer object:", event.dataTransfer);
@@ -145,13 +125,12 @@ function handleDrop(event) {
         return;
     }
     
+    const landing_square = event.target;
     let landing_X = parseInt(landing_square.dataset.x);
     let landing_Y = parseInt(landing_square.dataset.y);
     if (!isNaN(landing_X) && !isNaN(landing_Y)){
         if (isValidMove(current_X,current_Y,landing_X,landing_Y)){
-            board[landing_Y][landing_X] = board[current_Y][current_X];
-            board[current_Y][current_X] = null;
-            setPlayer(player == WHITE ? BLACK : WHITE);
+            [board,player] = makeMove(board,current_X,current_Y,landing_X,landing_Y,player);
             return generateChessboard();
         } else {
             console.error("Invalid landing data attributes:", landing_square);
@@ -163,9 +142,7 @@ function handleDrop(event) {
     landing_Y = parseInt(landing_square.parentNode.dataset.y);
     if (!isNaN(landing_X) && !isNaN(landing_Y)){
         if (isValidAttack(current_X,current_Y,landing_X,landing_Y)){
-            board[landing_Y][landing_X] = board[current_Y][current_X];
-            board[current_Y][current_X] = null;
-            setPlayer(player == WHITE ? BLACK : WHITE);
+            [board,player] = makeMove(board,current_X,current_Y,landing_X,landing_Y,player);
             return generateChessboard();
         } else {
             console.error("Invalid attacking data attributes:", landing_square);
@@ -173,6 +150,7 @@ function handleDrop(event) {
         }
     }
 }
+
 
 // Create a function to handle the dragging of a piece over a square
 function handleDragOver(event) {
@@ -193,15 +171,22 @@ function isValidMove(startX, startY, endX, endY) {
     if (startX==endX && startY== endY) return false;
     if (enemy != null) return false;
     
+    // players must move his own pieces
     if(player == WHITE && [BLACK_SOLDIER,BLACK_ARCER,BLACK_KNIGHT,BLACK_SPEAR].includes(piece)) return false;
     if(player == BLACK && [WHITE_SOLDIER,WHITE_ARCER,WHITE_KNIGHT,WHITE_SPEAR].includes(piece)) return false;
+    
+    // footman can only move at most one square
     if([BLACK_ARCER,BLACK_SPEAR,BLACK_SOLDIER,WHITE_ARCER,WHITE_SPEAR,WHITE_SOLDIER].includes(piece)){
         return Math.abs(startX-endX)<=1 && Math.abs(startY-endY)<=1;
     }
+
+    // horseman can move at most two squares
     if([BLACK_KNIGHT,WHITE_KNIGHT].includes(piece)){
         return Math.abs(startX-endX)<=2 && Math.abs(startY-endY)<=2;
     }
-    return true;
+
+    // something went wrong if we reach this state
+    return false;
 }
 
 /**
@@ -224,34 +209,20 @@ function isValidAttack(startX, startY, endX, endY) {
     // an arcer cannot attack a soldier
     if([BLACK_ARCER,WHITE_ARCER].includes(piece) && [BLACK_SOLDIER,WHITE_SOLDIER].includes(enemy)) return false;
     
+    // knights and archer can attack from 2 squares
     if([BLACK_ARCER,WHITE_ARCER,BLACK_KNIGHT,WHITE_KNIGHT].includes(piece)){
         return Math.abs(startX-endX)<=2 && Math.abs(startY-endY)<=2;
     }
+
+    // other pieces must by in direct contact with the enemy
     return Math.abs(startX-endX)<=1 && Math.abs(startY-endY)<=1;
 }
 
 
 /**
- * @param {*} piece piece
- * @return piece side
+ * generate the chessboard UI
  */
-function getSide(piece){
-    if ([BLACK_SOLDIER,BLACK_ARCER,BLACK_KNIGHT,BLACK_SPEAR].includes(piece)) return BLACK;
-    return WHITE;
-}
-
-/**
- * #     #   ###
- * #     #    #
- * #     #    #
- * #     #    #
- * #     #    #
- * #     #    #
- *  #####    ###
- */
-
-// Create a function to generate the chessboard UI
-function generateChessboard() {
+export function generateChessboard() {
     const chessboard = document.getElementById("chessboard");
     chessboard.innerHTML = "";
 
@@ -295,11 +266,5 @@ function generateChessboard() {
     }
 }
 
-//----------------------------------------------------------------------------------
 
 
-
-
-
-// Call the generateChessboard function to create the initial chessboard UI
-generateChessboard();
