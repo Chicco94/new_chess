@@ -1,5 +1,5 @@
 // Define chessboard dimensions
-import { BOARD,BOARD_WIDTH,BOARD_HEIGHT,BLACK_SOLDIER,BLACK_ARCER,BLACK_KNIGHT,BLACK_SPEAR,WHITE_SOLDIER,WHITE_ARCER,WHITE_KNIGHT,WHITE_SPEAR,WHITE,BLACK } from "./consts.js";
+import { BOARD,BOARD_WIDTH,BOARD_HEIGHT,BLACK_SOLDIER,BLACK_ARCHER,BLACK_KNIGHT,BLACK_SPEAR,WHITE_SOLDIER,WHITE_ARCHER,WHITE_KNIGHT,WHITE_SPEAR,WHITE,BLACK } from "./consts.js";
 import { getSide,makeMove } from "./utils.js";
 
 // Create an array to represent the initial state of the chessboard
@@ -142,7 +142,7 @@ function handleDrop(event) {
     landing_Y = parseInt(landing_square.parentNode.dataset.y);
     if (!isNaN(landing_X) && !isNaN(landing_Y)){
         if (isValidAttack(current_X,current_Y,landing_X,landing_Y)){
-            [board,player] = makeMove(board,current_X,current_Y,landing_X,landing_Y,player);
+            [board,player] = makeMove(board,current_X,current_Y,landing_X,landing_Y,player,true);
             return generateChessboard();
         } else {
             console.error("Invalid attacking data attributes:", landing_square);
@@ -172,11 +172,11 @@ function isValidMove(startX, startY, endX, endY) {
     if (enemy != null) return false;
     
     // players must move his own pieces
-    if(player == WHITE && [BLACK_SOLDIER,BLACK_ARCER,BLACK_KNIGHT,BLACK_SPEAR].includes(piece)) return false;
-    if(player == BLACK && [WHITE_SOLDIER,WHITE_ARCER,WHITE_KNIGHT,WHITE_SPEAR].includes(piece)) return false;
+    if(player == WHITE && [BLACK_SOLDIER,BLACK_ARCHER,BLACK_KNIGHT,BLACK_SPEAR].includes(piece)) return false;
+    if(player == BLACK && [WHITE_SOLDIER,WHITE_ARCHER,WHITE_KNIGHT,WHITE_SPEAR].includes(piece)) return false;
     
     // footman can only move at most one square
-    if([BLACK_ARCER,BLACK_SPEAR,BLACK_SOLDIER,WHITE_ARCER,WHITE_SPEAR,WHITE_SOLDIER].includes(piece)){
+    if([BLACK_ARCHER,BLACK_SPEAR,BLACK_SOLDIER,WHITE_ARCHER,WHITE_SPEAR,WHITE_SOLDIER].includes(piece)){
         return Math.abs(startX-endX)<=1 && Math.abs(startY-endY)<=1;
     }
 
@@ -207,10 +207,10 @@ function isValidAttack(startX, startY, endX, endY) {
     if([BLACK_KNIGHT,WHITE_KNIGHT].includes(piece) && [BLACK_SPEAR,WHITE_SPEAR].includes(enemy)) return false;
 
     // an arcer cannot attack a soldier
-    if([BLACK_ARCER,WHITE_ARCER].includes(piece) && [BLACK_SOLDIER,WHITE_SOLDIER].includes(enemy)) return false;
+    if([BLACK_ARCHER,WHITE_ARCHER].includes(piece) && [BLACK_SOLDIER,WHITE_SOLDIER].includes(enemy)) return false;
     
     // knights and archer can attack from 2 squares
-    if([BLACK_ARCER,WHITE_ARCER,BLACK_KNIGHT,WHITE_KNIGHT].includes(piece)){
+    if([BLACK_ARCHER,WHITE_ARCHER,BLACK_KNIGHT,WHITE_KNIGHT].includes(piece)){
         return Math.abs(startX-endX)<=2 && Math.abs(startY-endY)<=2;
     }
 
