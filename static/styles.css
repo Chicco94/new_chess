@@ -1,3 +1,7 @@
+body {
+    background-color: #f0efe4;;
+}
+
 /* CSS styling for the chessboard */
 #chessboard {
     display: flex;
@@ -56,13 +60,24 @@ img {
 }
 
 .timer {
-    background-color:#926a4e;
-    color:#edebc5;
     font-size:40px;
     text-align:center;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bolder;
 }
+
+.resign {
+    background-color: #926a4e;
+    color:#edebc5;
+    width: 20%;
+}
+
+.resign:hover {
+    background-color: #edebc5;
+    color:#926a4e;
+    width: 20%;
+}
+
 
 .top {
     position: fixed;
@@ -71,7 +86,7 @@ img {
 
 .bottom {
     position: fixed;
-    bottom: 0;
+    bottom: 10%;
 }
 
 .modal {
@@ -92,6 +107,8 @@ img {
     padding: 20px;
     width: 200px;
     border-radius: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bolder;
   }
   
   .modal p {

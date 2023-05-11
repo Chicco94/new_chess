@@ -7,22 +7,30 @@
     <body>
         <div class="row">
             <div class="column">
-                <p id="timerB" class="timer top"></p>
+                <div class="top resign" style="
+                    border-top-right-radius: 50px;
+                    border-bottom-right-radius: 50px;"
+                    id="resingB">
+                    <p id="timerB" class="timer"></p>
+                </div>
                 <input id="resingB" type="button" value="RESING"/>
             </div>
             <div class="board_column">
                 <div id="chessboard"></div>
             </div>
             <div class="column">
-                <p id="timerW" class="timer bottom"></p>
-                <input id="resingW" type="button" value="RESING"/>
+                <div class="bottom resign" style="
+                    border-top-left-radius: 50px;
+                    border-bottom-left-radius: 50px;"
+                    id="resingW">
+                    <p id="timerW" class="timer"></p>
+                </div>
             </div>
         </div>
 
         <div id="game-start-modal" class="modal" style="display: block;">
-            <div class="modal-container">
-                <p>Press to start the game</p>
-                <input id="start" type="button" value="START" />
+            <div class="modal-container" id="start">
+                START
             </div>
         </div>
         
